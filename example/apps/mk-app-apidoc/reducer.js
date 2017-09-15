@@ -11,11 +11,10 @@ class reducer {
         this.config = config.current
     }
 
-    init = (state, option) => {
+    init = (state, apis) => {
         const initState = getInitState()
-        initState.data.apis = this.config.apis
-        initState.data.groups = this.getGroupsTree(this.config.apis)
-        if(initState.data.groups && initState.data.groups.length > 0)
+        initState.data.groups = this.getGroupsTree(apis)
+        if (initState.data.groups && initState.data.groups.length > 0)
             initState.data.filter.group = initState.data.groups[0].group
 
         return this.metaReducer.init(state, initState)
@@ -29,18 +28,18 @@ class reducer {
 
         const appendNode = (group) => {
             var parent = ret
-            group.forEach(s =>{
-                const c = parent.find(o=> o.group == s)
+            group.forEach(s => {
+                const c = parent.find(o => o.group == s)
 
-                if(!c){
-                    let curr = {group:s, children:[]}
-                    parent.push( curr)
+                if (!c) {
+                    let curr = { group: s, children: [] }
+                    parent.push(curr)
                     parent = curr.children
-                }else{
+                } else {
                     parent.push(c)
                     parent = c.children
                 }
-                    
+
             })
         }
 

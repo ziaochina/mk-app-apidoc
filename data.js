@@ -54,6 +54,7 @@ export function getMeta() {
 					cell: {
 						name: 'cell',
 						component: 'DataGrid.Cell',
+						className: '{{$getCellClassName(_rowIndex)}}',
 						_power: '({rowIndex})=>rowIndex',
 						children: '{{data.apis[_rowIndex].url}}',
 					}
@@ -71,6 +72,7 @@ export function getMeta() {
 					cell: {
 						name: 'cell',
 						component: 'DataGrid.Cell',
+						className: '{{$getCellClassName(_rowIndex)}}',
 						_power: '({rowIndex})=>rowIndex',
 						children: '{{data.apis[_rowIndex].title}}',
 					}
@@ -88,6 +90,7 @@ export function getMeta() {
 					cell: {
 						name: 'cell',
 						component: 'DataGrid.Cell',
+						className: '{{$getCellClassName(_rowIndex)}}',
 						_power: '({rowIndex})=>rowIndex',
 						children: '{{data.apis[_rowIndex].group}}',
 					}
@@ -164,6 +167,7 @@ export function getMeta() {
 					value: `{{{
 						return data.currentApi
 							&& data.currentApi.parameter
+							&& data.currentApi.parameter.examples
 							&& data.currentApi.parameter.examples[0]
 							&& data.currentApi.parameter.examples[0].content
 					}}}`,
@@ -181,6 +185,7 @@ export function getMeta() {
 					value: `{{{
 						return data.currentApi
 							&& data.currentApi.parameter
+							&& data.currentApi.parameter.examples
 							&& data.currentApi.parameter.examples[1]
 							&& data.currentApi.parameter.examples[1].content
 					}}}`,
@@ -198,6 +203,7 @@ export function getMeta() {
 					value: `{{{
 						return data.currentApi
 							&& data.currentApi.success
+							&& data.currentApi.success.examples
 							&& data.currentApi.success.examples[0]
 							&& data.currentApi.success.examples[0].content
 					}}}`,
@@ -215,6 +221,7 @@ export function getMeta() {
 					value: `{{{
 						return data.currentApi
 							&& data.currentApi.success
+							&& data.currentApi.success.examples
 							&& data.currentApi.success.examples[1]
 							&& data.currentApi.success.examples[1].content
 					}}}`,

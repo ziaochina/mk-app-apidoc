@@ -6,6 +6,10 @@ import utils from 'mk-utils'
 import beautify from 'mk-utils/lib/beautify'
 import { fromJS } from 'immutable'
 
+let apisJson
+let apis
+
+
 class action {
     constructor(option) {
         this.metaAction = option.metaAction
@@ -15,24 +19,41 @@ class action {
     onInit = ({ component, injections }) => {
         this.component = component
         this.injections = injections
-        injections.reduce('init')
+
+        if (!apisJson) {
+            apisJson = [...this.config.apis]
+            Object.keys(utils.fetch.mockApi).forEach(k => {
+                if (apisJson.findIndex(o => o.url == k) == -1) {
+                    apisJson.push({
+                        url: k,
+                        group: '未写注释'
+                    })
+                }
+            })
+            apisJson = apisJson.sort((a, b) => a.url > b.url ? 1 : -1)
+            apisJson = apisJson.filter((o, index, self) => self.findIndex(x => x.url == o.url) == index)
+            apis = fromJS(apisJson)
+        }
+
+        injections.reduce('init', apisJson)
 
         const filter = this.metaAction.gf('data.filter').toJS()
+
         this.load(filter)
     }
 
     load = (filter) => {
-        const apis = this.config.apis.filter(o => {
-            return o.group.indexOf(filter.group) != -1
+        var lst = apis.filter(o => {
+            return o.get('group').indexOf(filter.group) != -1
                 && (
                     !filter.search
-                    || o.title.indexOf(filter.search) != -1
-                    || o.url.indexOf(filter.search) != -1
+                    || (o.get('title') && o.get('title').indexOf(filter.search) != -1)
+                    || (o.get('url') && o.get('url').indexOf(filter.search) != -1)
                 )
         })
 
         this.metaAction.sfs({
-            "data.apis": fromJS(apis),
+            "data.apis": lst,
             "data.filter": fromJS(filter)
         })
     }
@@ -77,7 +98,7 @@ class action {
     rowClick = (e, rowIndex) => {
         const api = this.metaAction.gf('data.apis.' + rowIndex)
         const currentApi = this.metaAction.gf('data.currentApi')
-        
+
         if (currentApi && currentApi.get('url') == api.get('url'))
             return
         const apiJSON = api.toJS()
@@ -86,7 +107,7 @@ class action {
         this.metaAction.sfs({
             'data.currentApi': api,
             'data.currentTabKey': 'base',
-            'data.runParams': apiParamExample.content,
+            'data.runParams': apiParamExample && apiParamExample.content,
             'data.runUrl': apiJSON.url,
             'data.runResult': undefined
         })
@@ -96,20 +117,26 @@ class action {
         this.metaAction.sf('data.currentTabKey', key)
     }
 
+    getCellClassName = (rowIndex) => {
+        if (this.metaAction.gf('data.currentApi.url') == this.metaAction.gf(`data.apis.${rowIndex}.url`))
+            return 'mk-app-apidoc-content-grid-content-cell mk-app-apidoc-content-grid-content-selectrow'
+        else
+            return 'mk-app-apidoc-content-grid-content-cell'
+    }
     runParamsChange = (e, d, v) => {
         this.metaAction.sf('data.runParams', v)
     }
 
     run = async () => {
         var runParams = this.metaAction.gf('data.runParams')
-        var runUrl  = this.metaAction.gf('data.runUrl')
+        var runUrl = this.metaAction.gf('data.runUrl')
         try {
             runParams = utils.string.toJson(runParams)
             const response = await utils.fetch.post(runUrl, runParams, undefined, { ignoreAOP: true })
-            
+
             this.metaAction.sf('data.runResult', beautify.beautifyJS(JSON.stringify(response)))
         } catch (e) {
-            
+
             this.metaAction.sf('data.runResult', e.stack)
         }
     }
