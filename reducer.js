@@ -21,6 +21,7 @@ class reducer {
     }
 
     getGroupsTree = (apis) => {
+        debugger
         if (!apis || apis.lenght == 0)
             return
 
